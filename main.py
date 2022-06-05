@@ -56,7 +56,6 @@ class NN():
             for nueron_index in range(len(self.layers[layer_index])):
                 self.layers[layer_index][nueron_index] += self.deltas[layer_index][nueron_index] * self.learning_rate * np.append(previous_input, 1)
 
-        print(self.layers[0])
         return np.average(np.abs(expected - self.outputs[-1]))
 
     #def train(self, inp, output, epochs=10000):
@@ -66,7 +65,7 @@ class NN():
         return final_err
 
 
-model = NN(learning_rate=0.01, layer_depth_array=[1], hidden_layers=0)
+model = NN(learning_rate=0.1, layer_depth_array=[1], hidden_layers=0)
 
 # Data for input and network object idea from Aidan Wilson @ https://towardsdatascience.com/inroduction-to-neural-networks-in-python-7e0b422e6c24
 # input data
@@ -84,7 +83,7 @@ errors = []
 
 # Iterate for n epochs
 for e in range(epochs):
-    #print("Epoch {}/{}".format(e + 1, epochs), end='\r')
+    print("Epoch {}/{}".format(e + 1, epochs), end='\r')
 
     error = 0
     selected_index = randint(0, len(inputs) - 1)
@@ -94,12 +93,14 @@ for e in range(epochs):
     model.forward(inp)
     cost_total = model.backprop(inp, expected_output) # summed avg err returned
     #print(inp, cost_total)
-    print("Given input {}, I output {}, expecting {}, yielding error {}".format(inp, model.outputs[-1], expected_output, cost_total))
+    #print("Given input {}, I output {}, expecting {}, yielding error {}".format(inp, model.outputs[-1], expected_output, cost_total))
     errors.append(cost_total)
+
+print(model.layers)
     
-plt.plot(errors)
+plt.plot([sum(errors[i:i+6])/6.0 for i in range(0,len(errors),6)])
 plt.title('Summed Avg Error for Nueral Network')
-plt.xlabel('epoch')
+plt.xlabel('epoch / 6')
 plt.ylabel('sum avg error (expected & output layer)')
 plt.ylim(0,1)
 plt.savefig("./myfig.png")
