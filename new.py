@@ -7,11 +7,11 @@ import sys
 
 class NN():
 
-    def __init__(self, learning_rate=0.01):
+    def __init__(self, hidden_layers=1, layer_depth_array=[5, 1], learning_rate=0.01):
+        assert hidden_layers == len(layer_depth_array) - 1
+        assert hidden_layers >= 1
         self.learning_rate = learning_rate
-        self.hidden_layer = np.random.rand(5,3+1)*2 - 1 # matrix
-        self.output_layer = np.random.rand(1,5+1)*2 - 1 # matrix
-        self.layers = [self.hidden_layer, self.output_layer]
+        self.layers = ([np.random.rand(layer_depth_array[i], layer_depth_array[i-1] + 1 if i > 0 else 1)*2 - 1 for i in range(len(layer_depth_array))],)
         self.deltas = []
 
     def sigmoid(self, x):
@@ -26,14 +26,18 @@ class NN():
     def forward(self, inp):
         assert type(inp) is np.ndarray
         assert 1 == inp.ndim
+        if type(self.layers) is tuple: # Layers needs to be initialized with weights to input layer
+            layers = self.layers[0]
+            input_shape = (layers[0].shape[0], inp.size + 1)
+            self.layers = [np.random.rand(*input_shape)*2 - 1, *layers[1:]]
         self.outputs = [None]*len(self.layers)
 
         for layer_index in range(len(self.layers)):
             previous_input = np.append(inp, 1) if layer_index == 0 else np.append(self.outputs[layer_index - 1], 1)
             self.outputs[layer_index] = np.array([])
             for nueron in self.layers[layer_index]:
-                d = self.sigmoid(nueron.dot(previous_input))
-                self.outputs[layer_index] = np.append(self.outputs[layer_index], d)
+                o = self.sigmoid(nueron.dot(previous_input))
+                self.outputs[layer_index] = np.append(self.outputs[layer_index], o)
 
         return self.outputs[-1]
 
@@ -62,7 +66,7 @@ class NN():
 
 
 
-model = NN(learning_rate=0.1)
+model = NN(learning_rate=0.1, layer_depth_array=[2, 1], hidden_layers=1)
 
 """
 Even num 1a then output should be 0, else 1
@@ -81,7 +85,7 @@ inputs = np.array([[0, 1, 0],
 # output data
 outputs = np.array([[0], [0], [0], [1], [1], [1]])
 
-epochs = 25000
+epochs = 10000
 
 errors = []
 
@@ -106,9 +110,8 @@ for e in range(epochs):
 
 plt.plot(errors)
 plt.ylim(0,1)
-plt.show()
-
-
+plt.savefig("./myfig.png")
+plt.close()
 
 
 
