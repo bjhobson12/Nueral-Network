@@ -86,19 +86,16 @@ for e in range(epochs):
     print("Epoch {}/{}".format(e + 1, epochs), end='\r')
 
     error = 0
-    selected_index = randint(0, len(inputs) - 1)
-    inp = inputs[selected_index]
-    expected_output = outputs[selected_index]
-
-    model.forward(inp)
-    cost_total = model.backprop(inp, expected_output) # summed avg err returned
+    for i, o in zip(inputs, outputs):
+        model.forward(i)
+        cost = model.backprop(i, o) # summed avg err returned
+        error += cost
+    error /= float(len(inputs))
     #print(inp, cost_total)
     #print("Given input {}, I output {}, expecting {}, yielding error {}".format(inp, model.outputs[-1], expected_output, cost_total))
-    errors.append(cost_total)
+    errors.append(error)
 
-print(model.layers)
-    
-plt.plot([sum(errors[i:i+6])/6.0 for i in range(0,len(errors),6)])
+plt.plot(errors)
 plt.title('Summed Avg Error for Nueral Network')
 plt.xlabel('epoch / 6')
 plt.ylabel('sum avg error (expected & output layer)')
